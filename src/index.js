@@ -14,7 +14,10 @@ ReactDOM.render(<App />, document.getElementById('root'));
 serviceWorker.unregister();
 
 /*
+https://reactjs.org/tutorial/tutorial.html
+
 TO DO:
+* turn into mobile app
 - turn # instead of xIsNext
 - Button to start over or reset
 - error message for: square already filled, ...
@@ -194,7 +197,6 @@ class Game extends React.Component {
         });
     }
 
-
     render() {
         const history = this.state.history;
         //const current = history[history.length - 1]; // before time travel implementation
@@ -203,12 +205,22 @@ class Game extends React.Component {
 
         const moves = history.map((step, move) => {
             const desc = move ? 'Go to move #' + move : 'Go to game start';
-            
-            return (
-                <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                </li>
-            );
+            console.log('step: ' + step);
+            console.log('move: ' + move);
+            console.log('this.state.stepNumber: ' + this.state.stepNumber);
+            if (move === this.state.stepNumber) {
+                return (
+                    <li key={move}>
+                        <button onClick={() => this.jumpTo(move)}><b>{desc}</b></button>
+                    </li>
+                );
+            } else {
+                return (
+                    <li key={move}>
+                        <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    </li>
+                );
+            };
         });
 
         let status;
