@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+
+import './index.css';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
@@ -13,9 +15,17 @@ serviceWorker.unregister();
 
 /*
 TO DO:
-- tie game status message
 - turn # instead of xIsNext
 - Button to start over or reset
+- error message for: square already filled, ...
+
+TO DO from tutorial:
+- display location of each move as (row,col) in move history list
+- bold currently selected item in move list
+- rewrite board to use 2 loops to make squares instead of hardcoding them
+- add toggle button to sort moves in asc or desc order
+- when someone wins, highlight the 3 winning squares
+- when no one wins, display msg about result being a draw (tie game msg)
 
 */
 
@@ -71,6 +81,7 @@ function Square(props) {
 }
 
 class Board extends React.Component {
+    /*
     constructor(props) {
         super(props);
         this.state = {
@@ -78,6 +89,7 @@ class Board extends React.Component {
             xIsNext: true,
         }
     }
+    */
 
     /*
     handleClick(i) {
@@ -177,6 +189,16 @@ class Game extends React.Component {
         const current = history[history.length - 1];
         const winner = calculateWinner(current.squares);
 
+        const moves = history.map((step, move) => {
+            const desc = move ? 'Go to move #' + move : 'Go to game start';
+            
+            return (
+                <li>
+                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                </li>
+            );
+        });
+
         let status;
         if (winner) {
             status = 'Winner: ' + winner;
@@ -185,18 +207,18 @@ class Game extends React.Component {
         }
 
         return (
-        <div className="game">
-            <div className="game-board">
-                <Board 
-                    squares={current.squares}
-                    onClick={(i) => this.handleClick(i)}
-                />
+            <div className="game">
+                <div className="game-board">
+                    <Board 
+                        squares={current.squares}
+                        onClick={(i) => this.handleClick(i)}
+                    />
+                </div>
+                <div className="game-info">
+                    <div>{status}</div>
+                    <ol>{moves}</ol>
+                </div>
             </div>
-            <div className="game-info">
-                <div>{status}</div>
-                <ol>{/* TODO */}</ol>
-            </div>
-        </div>
         );
     }
 }
