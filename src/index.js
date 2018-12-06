@@ -24,12 +24,13 @@ TO DO:
 
 TO DO from tutorial:
 - display location of each move as (row,col) in move history list
-- bold currently selected item in move list
-- rewrite board to use 2 loops to make squares instead of hardcoding them
 - add toggle button to sort moves in asc or desc order
 - when someone wins, highlight the 3 winning squares
 - when no one wins, display msg about result being a draw (tie game msg)
 
+DONE:
+- bold currently selected item in move list
+- rewrite board to use 2 loops to make squares instead of hardcoding them
 */
 
 /*
@@ -123,19 +124,28 @@ class Board extends React.Component {
         );
     }
 
-    render() {
-        /*
-        const winner = calculateWinner(this.state.squares);
-        let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else {
-            const status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-        */
+    createBoard() {
+        let board = []
 
+        for (let row = 0; row < 3; ++row) {
+            let boardRow = []
+            let start = 3 * row;
+            for (let col = 0; col < 3; ++col) {
+                boardRow.push(this.renderSquare(start + col));
+            }
+            board.push(<div className="board-row">{boardRow}</div>);
+        }
+        return board
+    }
+
+    render() {
         return (
-                //<div className="status">{status}</div>
+            <div>
+                {this.createBoard()}
+            </div>
+                        
+            //<div className="status">{status}</div>
+            /*
             <div>
                 <div className="board-row">
                     {this.renderSquare(0)}
@@ -153,6 +163,7 @@ class Board extends React.Component {
                     {this.renderSquare(8)}
                 </div>
             </div>
+            */
         );
     }
 }
