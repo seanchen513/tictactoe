@@ -23,7 +23,6 @@ TO DO:
 - error message for: square already filled, ...
 
 TO DO from tutorial:
-- display location of each move as (row,col) in move history list
 - add toggle button to sort moves in asc or desc order
 - when someone wins, highlight the 3 winning squares
 - when no one wins, display msg about result being a draw (tie game msg)
@@ -31,6 +30,7 @@ TO DO from tutorial:
 DONE:
 - bold currently selected item in move list
 - rewrite board to use 2 loops to make squares instead of hardcoding them
+- display location of each move as (row,col) in move history list
 */
 
 /*
@@ -113,11 +113,9 @@ class Board extends React.Component {
     */
 
     renderSquare(i) {
-        //return <Square value={i} />;
         return (
             <Square 
-                //value={this.state.squares[i]}
-                //onClick={() => this.handleClick(i)}
+                key={i}
                 value={this.props.squares[i]}
                 onClick={() => this.props.onClick(i)}
             />
@@ -133,9 +131,9 @@ class Board extends React.Component {
             for (let col = 0; col < 3; ++col) {
                 boardRow.push(this.renderSquare(start + col));
             }
-            board.push(<div className="board-row">{boardRow}</div>);
+            board.push(<div key={row} className="board-row">{boardRow}</div>);
         }
-        return board
+        return board;
     }
 
     render() {
@@ -143,27 +141,6 @@ class Board extends React.Component {
             <div>
                 {this.createBoard()}
             </div>
-                        
-            //<div className="status">{status}</div>
-            /*
-            <div>
-                <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-            </div>
-            */
         );
     }
 }
@@ -174,15 +151,17 @@ class Game extends React.Component {
         this.state = {
             history: [{
                 squares: Array(9).fill(null),
+                row: null,
+                col: null,
             }],
-            stepNumber: 0,
+            moveNumber: 0,
             xIsNext: true,
         };
     }
 
     handleClick(i) {
         //const history = this.state.history; // before time travel implementation
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const history = this.state.history.slice(0, this.state.moveNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice(); // slice() to create copy of sqaures array
         
@@ -192,46 +171,62 @@ class Game extends React.Component {
         }
 
         squares[i] = this.state.xIsNext ? 'X' : 'O';
+        let row = Math.floor(i / 3) + 1;
+        let col = (i % 3) + 1;
         this.setState({
             history: history.concat([{
                 squares: squares,
+                row: row,
+                col: col,
             }]),
-            stepNumber: history.length,
+            moveNumber: history.length,
             xIsNext: !this.state.xIsNext,
         });
     }
 
-    jumpTo(step) {
+    jumpTo(move) {
         this.setState({
-            stepNumber: step,
-            xIsNext: (step %2) === 0,
+            moveNumber: move,
+            xIsNext: (move % 2) === 0,
         });
+    }
+
+    //moveListLine(move) {
+    coordinates(move, snapshot) {
+        let line = [];
+        if (move > 0) {
+            if (move === this.state.moveNumber)
+                line.push(<b>({snapshot.row}, {snapshot.col})</b>);
+            else
+                line.push(<>({snapshot.row}, {snapshot.col})</>);
+        }
+        return line;
+    }
+
+    desc(move) {
+        const desc = move ? 'Go to move #' + move : 'Go to game start';
+        if (move === this.state.moveNumber)
+            return <b>{desc}</b>;
+        else
+            return desc;
     }
 
     render() {
         const history = this.state.history;
         //const current = history[history.length - 1]; // before time travel implementation
-        const current = history[this.state.stepNumber];
+        const current = history[this.state.moveNumber];
         const winner = calculateWinner(current.squares);
 
-        const moves = history.map((step, move) => {
-            const desc = move ? 'Go to move #' + move : 'Go to game start';
-            console.log('step: ' + step);
+        const moves = history.map((snapshot, move) => {
+            console.log('snapshot: ' + snapshot);
             console.log('move: ' + move);
-            console.log('this.state.stepNumber: ' + this.state.stepNumber);
-            if (move === this.state.stepNumber) {
-                return (
-                    <li key={move}>
-                        <button onClick={() => this.jumpTo(move)}><b>{desc}</b></button>
-                    </li>
-                );
-            } else {
-                return (
-                    <li key={move}>
-                        <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                    </li>
-                );
-            };
+            console.log('this.state.moveNumber: ' + this.state.moveNumber);
+            return (
+                <li key={move}>
+                    {this.coordinates(move, snapshot)}
+                    <button onClick={() => this.jumpTo(move)}>{this.desc(move)}</button>
+                </li>
+            );
         });
 
         let status;
@@ -251,7 +246,7 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <ol>{moves}</ol>
+                    <ol start="0">{moves}</ol>
                 </div>
             </div>
         );
